@@ -1,0 +1,5 @@
+# `npx wrangler dev` で手元で動かすときの秘密の設定。
+# このファイルを .dev.vars という名前でコピーして、自分の値を入れる（.dev.vars は GitHub に上げない）
+WEBCLASS_USERNAME=
+WEBCLASS_PASSWORD=
+DISCORD_WEBHOOK=

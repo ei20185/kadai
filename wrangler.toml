@@ -1,0 +1,22 @@
+name = "webclass-notifier"
+main = "src/index.ts"
+compatibility_date = "2024-09-23"
+
+# 平日 9:00〜17:59（日本時間）に毎分動かす。cron は UTC で書く（日本時間 − 9時間）
+[triggers]
+crons = ["* 0-8 * * MON-FRI"]
+
+# ログイン状態と「通知済み」の課題を入れておく場所
+[[kv_namespaces]]
+binding = "STATE"
+id = "<自分の KV namespace の id>"
+
+# 課題の記録（17時に1日1回保存）
+[[d1_databases]]
+binding = "DB"
+database_name = "webclass-notifier"
+database_id = "<自分の D1 database の id>"
+
+# WEBCLASS_USERNAME / WEBCLASS_PASSWORD / DISCORD_WEBHOOK は、ここには書かない。
+#   npx wrangler secret put WEBCLASS_USERNAME
+# のように「秘密の設定」として登録する。

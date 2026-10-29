@@ -1,0 +1,5 @@
+node_modules/
+.wrangler/
+# 秘密の設定（パスワードなど）
+.dev.vars
+.env
