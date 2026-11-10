@@ -17,19 +17,17 @@ export function timeLabel(sec: number): string {
   return TIME_FORMAT.format(new Date(sec * 1000));
 }
 
-function line(a: Assignment, withTime: boolean): string {
-  const time = withTime ? `${timeLabel(a.endSec)}まで` : "";
-  return `・${time}【${a.kind}】${a.title}（${a.course}）`;
+function line(a: Assignment): string {
+  return `・${timeLabel(a.endSec)}まで【${a.kind}】${a.title}（${a.course}）`;
 }
 
-/** 未提出の課題を、締切日ごとにまとめた通知文にする */
+/** 未提出の課題を、締切日ごとにまとめた通知文にする（締切のない課題は通知しない） */
 export function buildUnsubmittedSummary(items: Assignment[], nowSec: number): { title: string; body: string } {
-  const unsubmitted = items.filter((i) => !i.submitted && (i.endSec === 0 || i.endSec > nowSec));
-  const title = `未提出の課題 ${unsubmitted.length} 件（${dayLabel(nowSec)} ${timeLabel(nowSec)} 時点）`;
-  if (unsubmitted.length === 0) return { title, body: "未提出の課題はありません 🎉" };
-
-  const withDeadline = unsubmitted.filter((i) => i.endSec > 0).sort((x, y) => x.endSec - y.endSec);
-  const noDeadline = unsubmitted.filter((i) => i.endSec === 0);
+  const withDeadline = items
+    .filter((i) => !i.submitted && i.endSec > nowSec) // endSec が 0（締切なし）や締切切れは入らない
+    .sort((x, y) => x.endSec - y.endSec);
+  const title = `未提出の課題 ${withDeadline.length} 件（${dayLabel(nowSec)} ${timeLabel(nowSec)} 時点）`;
+  if (withDeadline.length === 0) return { title, body: "未提出の課題はありません 🎉" };
 
   const lines: string[] = [];
   let currentDay = "";
@@ -39,10 +37,7 @@ export function buildUnsubmittedSummary(items: Assignment[], nowSec: number): { 
       lines.push(`■ ${day}`);
       currentDay = day;
     }
-    lines.push(line(a, true));
-  }
-  if (noDeadline.length > 0) {
-    lines.push("■ 締切なし", ...noDeadline.map((a) => line(a, false)));
+    lines.push(line(a));
   }
   return { title, body: lines.join("\n") };
 }
