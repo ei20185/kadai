@@ -11,7 +11,7 @@ const jst = (d: number, h: number, m: number) => Date.UTC(2026, 9, d, h - 9, m) 
 
 const base = { course: "授業A", kind: "レポート", submitted: false };
 
-test("未提出の課題を、締切日ごとにまとめる", () => {
+test("未提出の課題を、締切日ごとにまとめる（締切なしは入れない）", () => {
   const items: Assignment[] = [
     { ...base, id: "2", title: "後の課題", endSec: jst(31, 23, 59) },
     { ...base, id: "1", title: "先の課題", endSec: jst(30, 9, 0) },
@@ -21,7 +21,7 @@ test("未提出の課題を、締切日ごとにまとめる", () => {
     { ...base, id: "6", title: "締切が過ぎた", endSec: jst(28, 9, 0) },
   ];
   const { title, body } = buildUnsubmittedSummary(items, NOW);
-  assert.equal(title, "未提出の課題 4 件（10/29(木) 17:00 時点）");
+  assert.equal(title, "未提出の課題 3 件（10/29(木) 17:00 時点）");
   assert.equal(
     body,
     [
@@ -30,10 +30,15 @@ test("未提出の課題を、締切日ごとにまとめる", () => {
       "■ 10/31(土)",
       "・12:00まで【小テスト】同じ日の課題（授業A）",
       "・23:59まで【レポート】後の課題（授業A）",
-      "■ 締切なし",
-      "・【アンケート】締切なしの課題（授業A）",
     ].join("\n")
   );
+});
+
+test("締切なしの課題しか残っていなければ「ありません」になる", () => {
+  const items: Assignment[] = [{ ...base, id: "x", title: "締切なしの課題", endSec: 0, kind: "アンケート" }];
+  const { title, body } = buildUnsubmittedSummary(items, NOW);
+  assert.equal(title, "未提出の課題 0 件（10/29(木) 17:00 時点）");
+  assert.equal(body, "未提出の課題はありません 🎉");
 });
 
 test("未提出がなければ、そう伝える", () => {
